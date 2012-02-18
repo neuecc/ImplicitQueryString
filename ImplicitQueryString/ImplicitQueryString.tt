@@ -1,4 +1,12 @@
-﻿<#@ template language="C#" #>
+﻿/*--------------------------------------------------------------------------
+ * ImplicitQueryString
+ * ver 1.0.0.0 (Feb. 18th, 2012)
+ *
+ * created and maintained by neuecc <ils@neue.cc - @neuecc on Twitter>
+ * licensed under Microsoft Public License(Ms-PL)
+ * http://implicitquerystring.codeplex.com/
+ *--------------------------------------------------------------------------*/
+<#@ template language="C#" #>
 <#@ output extension="cs" #>
 <#@ assembly Name="System.Core.dll" #>
 <#@ import namespace="System" #>
@@ -11,7 +19,8 @@
     var converters = methods.Where(x => x.Name.StartsWith("To"))
         .Select(x => Regex.Replace(x.Name, "^To", ""))
         .Where(x => !x.StartsWith("Base64") && x != "String")
-        .Distinct();
+        .Distinct()
+        .ToArray();
 #>
 using System;
 using System.Collections.Generic;
@@ -21,11 +30,26 @@ namespace CodePlex.Web
 {
     public static class NameValueCollectionExtensions
     {
+        /// <summary>
+        /// <para>Parse value to impilicit convert to left basic type(int, long, double, string, datetime, etc...).</para>
+        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// </summary>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <returns>Implicit convertable to basic types(int, long, double, string, datetime, etc...) value.</returns>
         public static ConvertableString ParseValue(this NameValueCollection source, string key)
         {
             return ParseValue(source, key, null);
         }
 
+        /// <summary>
+        /// <para>Parse value to impilicit convert to left basic type(int, long, double, string, datetime, etc...).</para>
+        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// </summary>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <param name="converter">Convert string to string before parse.</param>
+        /// <returns>Implicit convertable to basic types(int, long, double, string, datetime, etc...) value.</returns>
         public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter)
         {
             var values = source.GetValues(key);
@@ -35,24 +59,60 @@ namespace CodePlex.Web
             return new ConvertableString(converter == null ? value : converter(value));
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum. Enum parsing ignoreCase is false.</para>
+        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnum<T>(this NameValueCollection source, string key)
             where T : struct, IComparable, IFormattable, IConvertible
         {
-            return ParseEnum<T>(source, key, null, true);
+            return ParseEnum<T>(source, key, null, false);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum. Enum parsing ignoreCase is false.</para>
+        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <param name="converter">Convert string to string before parse.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter)
             where T : struct, IComparable, IFormattable, IConvertible
         {
-            return ParseEnum<T>(source, key, converter, true);
+            return ParseEnum<T>(source, key, converter, false);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum.</para>
+        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key. If key is not found then throw KeyNotFoundException.</param>
+        /// <param name="ignoreCase">Is ignore allow parse capital or lower case.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnum<T>(this NameValueCollection source, string key, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             return ParseEnum<T>(source, key, null, ignoreCase);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum.</para>
+        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <param name="converter">Convert string to string before parse.</param>
+        /// <param name="ignoreCase">Is ignore allow parse capital or lower case.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
@@ -64,11 +124,28 @@ namespace CodePlex.Web
         }
 
 <# foreach (var converter in converters) { #>
+        /// <summary>
+        /// <para>Parse value.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <param name="defaultValue">Returns default value if parsing failed.</param>
+        /// <returns>Parsed value or default value.</returns>
         public static <#= converter #> ParseValueOrDefault(this NameValueCollection source, string key, <#= converter #> defaultValue)
         {
             return ParseValueOrDefault(source, key, defaultValue, null);
         }
 
+        /// <summary>
+        /// <para>Parse value. If fail parsing or key not found then return defaultValue.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key.</param>
+        /// <param name="defaultValue">Returns default value if parsing failed.</param>
+        /// <param name="converter">Convert string to string before parse.</param>
+        /// <returns>Parsed value or default value.</returns>
         public static <#= converter #> ParseValueOrDefault(this NameValueCollection source, string key, <#= converter #> defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
@@ -90,30 +167,78 @@ namespace CodePlex.Web
         }
 
 <# } #>
+        /// <summary>
+        /// <para>Convert to enum. T must be enum. Enum parsing ignoreCase is false.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key. If key is not found then throw KeyNotFoundException.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             return ParseEnumOrDefault(source, key, default(T), null, false);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum. Enum parsing ignoreCase is false.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key. If key is not found then throw KeyNotFoundException.</param>
+        /// <param name="defaultValue">Returns default value if parsing failed.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             return ParseEnumOrDefault(source, key, defaultValue, null, false);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum. Enum parsing ignoreCase is false.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key. If key is not found then throw KeyNotFoundException.</param>
+        /// <param name="defaultValue">Returns default value if parsing failed.</param>
+        /// <param name="converter">Convert string to string before parse.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, Func<string, string> converter)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             return ParseEnumOrDefault(source, key, defaultValue, converter, false);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key. If key is not found then throw KeyNotFoundException.</param>
+        /// <param name="defaultValue">Returns default value if parsing failed.</param>
+        /// <param name="ignoreCase">Is ignore allow parse capital or lower case.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             return ParseEnumOrDefault(source, key, defaultValue, null, ignoreCase);
         }
 
+        /// <summary>
+        /// <para>Convert to enum. T must be enum.</para>
+        /// <para>If fail parsing or key not found then return defaultValue.</para>
+        /// </summary>
+        /// <typeparam name="T">Enum</typeparam>
+        /// <param name="source">Collection holder.</param>
+        /// <param name="key">Value's key. If key is not found then throw KeyNotFoundException.</param>
+        /// <param name="defaultValue">Returns default value if parsing failed.</param>
+        /// <param name="converter">Convert string to string before parse.</param>
+        /// <param name="ignoreCase">Is ignore allow parse capital or lower case.</param>
+        /// <returns>Parsed enum.</returns>
         public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, Func<string, string> converter, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
@@ -135,6 +260,12 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
+        /// <summary>
+        /// Is NameValueCollection contains key.
+        /// </summary>
+        /// <param name="source">Collection.</param>
+        /// <param name="key">Key.</param>
+        /// <returns>IsContainsKey</returns>
         public static bool ContainsKey(this NameValueCollection source, string key)
         {
             return source.GetValues(key) != null;
