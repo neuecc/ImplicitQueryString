@@ -21,7 +21,7 @@ This is Extension Methods for NameValueCollection and provides single .cs file.
 
 ---Usage---
 
-using CodePlex.Web; // using for NameValueCollection Extensions Methods
+using Codeplex.Web; // using for NameValueCollection Extensions Methods
 
 // ASP.NET Example
 public partial class _Default : System.Web.UI.Page

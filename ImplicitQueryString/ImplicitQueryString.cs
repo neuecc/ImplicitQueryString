@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace CodePlex.Web
+namespace Codeplex.Web
 {
     public static class NameValueCollectionExtensions
     {

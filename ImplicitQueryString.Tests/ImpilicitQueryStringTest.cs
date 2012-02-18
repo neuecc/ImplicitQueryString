@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Specialized;
-using CodePlex.Web;
+using Codeplex.Web;
 using System.Text.RegularExpressions;
 
 namespace ImplicitQueryString.Tests
