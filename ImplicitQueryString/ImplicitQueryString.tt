@@ -1,0 +1,127 @@
+﻿<#@ template language="C#" #>
+<#@ output extension="cs" #>
+<#@ assembly Name="System.Core.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Reflection" #>
+<#
+    var methods = typeof(Convert).GetMethods(BindingFlags.Static | BindingFlags.Public);
+
+    var converters = methods.Where(x => x.Name.StartsWith("To"))
+        .Select(x => Regex.Replace(x.Name, "^To", ""))
+        .Where(x => !x.StartsWith("Base64") && x != "String")
+        .Distinct();
+#>
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+
+namespace CodePlex.Web
+{
+    public static class NameValueCollectionExtensions
+    {
+        public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter = null)
+        {
+            var values = source.GetValues(key);
+            if (values == null) throw new KeyNotFoundException();
+
+            var value = values.First();
+            return new ConvertableString(converter == null ? value : converter(value));
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter = null, bool ignoreCase = true)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            var values = source.GetValues(key);
+            if (values == null) throw new KeyNotFoundException();
+
+            var value = values.First();
+            return (T)Enum.Parse(typeof(T), converter == null ? value : converter(value), ignoreCase);
+        }
+
+<# foreach (var converter in converters) { #>
+        public static <#= converter #> ParseValueOrDefault(this NameValueCollection source, string key, <#= converter #> defaultValue = default(<#= converter #>), Func<string, string> converter = null)
+        {
+            var values = source.GetValues(key) ?? new string[0];
+            if (values.Any())
+            {
+                var value = values.First();
+                <#= converter #> result;
+                if (value != null && <#= converter #>.TryParse(converter == null ? value : converter(value), out result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return defaultValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
+<# } #>
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue = default(T), bool ignoreCase = true)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            var values = source.GetValues(key) ?? new string[0];
+            if (values.Any())
+            {
+                var value = values.First();
+                T result;
+                if (value != null && Enum.TryParse(value, ignoreCase, out result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return defaultValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        public static bool ContainsKey(this NameValueCollection source, string key)
+        {
+            return source.GetValues(key) != null;
+        }
+    }
+
+    public struct ConvertableString
+    {
+        public readonly string Value;
+
+        public ConvertableString(string value)
+        {
+            this.Value = value;
+        }
+
+<# foreach (var converter in converters) { #>
+        public static implicit operator <#= converter #>(ConvertableString self)
+        {
+            return <#= converter #>.Parse(self.Value);
+        }
+
+        public static implicit operator <#= converter #>?(ConvertableString self)
+        {
+            <#= converter #> value;
+            return (self.Value != null && <#= converter #>.TryParse(self.Value, out value))
+                ? new Nullable<<#= converter #>>(value)
+                : null;
+        }
+
+<# } #>
+        public static implicit operator String(ConvertableString self)
+        {
+            return self.Value;
+        }
+
+        public override string ToString()
+        {
+            return Value;
+        }
+    }
+}
