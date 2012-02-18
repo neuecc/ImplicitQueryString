@@ -12,6 +12,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{F23AF95F-5BAB-429E-B64E-D3662FE954C4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\ReadMe.txt = Docs\ReadMe.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildTools", "BuildTools", "{3E3B5BC6-D9F6-410E-9ACD-179037211C17}"
+	ProjectSection(SolutionItems) = preProject
+		BuildTools\implicitquerystring.nuspec = BuildTools\implicitquerystring.nuspec
+		BuildTools\NuGet.exe = BuildTools\NuGet.exe
+		BuildTools\pack.bat = BuildTools\pack.bat
+		BuildTools\push.bat = BuildTools\push.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = ImplicitQueryString.vsmdi

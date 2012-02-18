@@ -16,7 +16,7 @@ namespace CodePlex.Web
     {
         /// <summary>
         /// <para>Parse value to impilicit convert to left basic type(int, long, double, string, datetime, etc...).</para>
-        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// <para>If key is not found, left is nullable then return null, else KeyNotFoundException.</para>
         /// </summary>
         /// <param name="source">Collection holder.</param>
         /// <param name="key">Value's key.</param>
@@ -28,7 +28,7 @@ namespace CodePlex.Web
 
         /// <summary>
         /// <para>Parse value to impilicit convert to left basic type(int, long, double, string, datetime, etc...).</para>
-        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// <para>If key is not found, left is nullable then return null, else KeyNotFoundException.</para>
         /// </summary>
         /// <param name="source">Collection holder.</param>
         /// <param name="key">Value's key.</param>
@@ -37,7 +37,7 @@ namespace CodePlex.Web
         public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter)
         {
             var values = source.GetValues(key);
-            if (values == null) throw new KeyNotFoundException();
+            if (values == null) return new ConvertableString(null);
 
             var value = values[0];
             return new ConvertableString(converter == null ? value : converter(value));
@@ -815,9 +815,13 @@ namespace CodePlex.Web
         }
     }
 
+    /// <summary>
+    /// <para>Implicit convertable string. This class is specialized for NameValueCollectionExtensions.</para>
+    /// <para>If value is null and convert to struct then throw KeyNotFoundException.</para>
+    /// </summary>
     public struct ConvertableString
     {
-        public readonly string Value;
+        readonly string Value;
 
         public ConvertableString(string value)
         {
@@ -826,6 +830,7 @@ namespace CodePlex.Web
 
         public static implicit operator Boolean(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Boolean.Parse(self.Value);
         }
 
@@ -839,6 +844,7 @@ namespace CodePlex.Web
 
         public static implicit operator Char(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Char.Parse(self.Value);
         }
 
@@ -852,6 +858,7 @@ namespace CodePlex.Web
 
         public static implicit operator SByte(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return SByte.Parse(self.Value);
         }
 
@@ -865,6 +872,7 @@ namespace CodePlex.Web
 
         public static implicit operator Byte(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Byte.Parse(self.Value);
         }
 
@@ -878,6 +886,7 @@ namespace CodePlex.Web
 
         public static implicit operator Int16(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Int16.Parse(self.Value);
         }
 
@@ -891,6 +900,7 @@ namespace CodePlex.Web
 
         public static implicit operator UInt16(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return UInt16.Parse(self.Value);
         }
 
@@ -904,6 +914,7 @@ namespace CodePlex.Web
 
         public static implicit operator Int32(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Int32.Parse(self.Value);
         }
 
@@ -917,6 +928,7 @@ namespace CodePlex.Web
 
         public static implicit operator UInt32(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return UInt32.Parse(self.Value);
         }
 
@@ -930,6 +942,7 @@ namespace CodePlex.Web
 
         public static implicit operator Int64(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Int64.Parse(self.Value);
         }
 
@@ -943,6 +956,7 @@ namespace CodePlex.Web
 
         public static implicit operator UInt64(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return UInt64.Parse(self.Value);
         }
 
@@ -956,6 +970,7 @@ namespace CodePlex.Web
 
         public static implicit operator Single(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Single.Parse(self.Value);
         }
 
@@ -969,6 +984,7 @@ namespace CodePlex.Web
 
         public static implicit operator Double(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Double.Parse(self.Value);
         }
 
@@ -982,6 +998,7 @@ namespace CodePlex.Web
 
         public static implicit operator Decimal(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return Decimal.Parse(self.Value);
         }
 
@@ -995,6 +1012,7 @@ namespace CodePlex.Web
 
         public static implicit operator DateTime(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return DateTime.Parse(self.Value);
         }
 

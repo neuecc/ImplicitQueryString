@@ -32,7 +32,7 @@ namespace CodePlex.Web
     {
         /// <summary>
         /// <para>Parse value to impilicit convert to left basic type(int, long, double, string, datetime, etc...).</para>
-        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// <para>If key is not found, left is nullable then return null, else KeyNotFoundException.</para>
         /// </summary>
         /// <param name="source">Collection holder.</param>
         /// <param name="key">Value's key.</param>
@@ -44,7 +44,7 @@ namespace CodePlex.Web
 
         /// <summary>
         /// <para>Parse value to impilicit convert to left basic type(int, long, double, string, datetime, etc...).</para>
-        /// <para>If key is not found then throw KeyNotFoundException.</para>
+        /// <para>If key is not found, left is nullable then return null, else KeyNotFoundException.</para>
         /// </summary>
         /// <param name="source">Collection holder.</param>
         /// <param name="key">Value's key.</param>
@@ -53,7 +53,7 @@ namespace CodePlex.Web
         public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter)
         {
             var values = source.GetValues(key);
-            if (values == null) throw new KeyNotFoundException();
+            if (values == null) return new ConvertableString(null);
 
             var value = values[0];
             return new ConvertableString(converter == null ? value : converter(value));
@@ -287,9 +287,13 @@ namespace CodePlex.Web
         }
     }
 
+    /// <summary>
+    /// <para>Implicit convertable string. This class is specialized for NameValueCollectionExtensions.</para>
+    /// <para>If value is null and convert to struct then throw KeyNotFoundException.</para>
+    /// </summary>
     public struct ConvertableString
     {
-        public readonly string Value;
+        readonly string Value;
 
         public ConvertableString(string value)
         {
@@ -299,6 +303,7 @@ namespace CodePlex.Web
 <# foreach (var converter in converters) { #>
         public static implicit operator <#= converter #>(ConvertableString self)
         {
+            if (self.Value == null) throw new KeyNotFoundException();
             return <#= converter #>.Parse(self.Value);
         }
 

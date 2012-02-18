@@ -102,6 +102,16 @@ namespace ImplicitQueryString.Tests
         }
 
         [TestMethod]
+        public void Nullable()
+        {
+            int? num = nvc.ParseValue("successInt");
+            num.Is(100);
+
+            int? num2 = nvc.ParseValue("notfound");
+            num2.IsNull();
+        }
+
+        [TestMethod]
         public void ContainsKey()
         {
             nvc.ContainsKey("enum1").Is(true);
