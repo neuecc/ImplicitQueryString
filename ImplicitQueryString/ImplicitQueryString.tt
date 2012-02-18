@@ -16,38 +16,65 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 
 namespace CodePlex.Web
 {
     public static class NameValueCollectionExtensions
     {
-        public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter = null)
+        public static ConvertableString ParseValue(this NameValueCollection source, string key)
+        {
+            return ParseValue(source, key, null);
+        }
+
+        public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter)
         {
             var values = source.GetValues(key);
             if (values == null) throw new KeyNotFoundException();
 
-            var value = values.First();
+            var value = values[0];
             return new ConvertableString(converter == null ? value : converter(value));
         }
 
-        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter = null, bool ignoreCase = true)
+        public static T ParseEnum<T>(this NameValueCollection source, string key)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnum<T>(source, key, null, true);
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnum<T>(source, key, converter, true);
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, bool ignoreCase)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnum<T>(source, key, null, ignoreCase);
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             var values = source.GetValues(key);
             if (values == null) throw new KeyNotFoundException();
 
-            var value = values.First();
+            var value = values[0];
             return (T)Enum.Parse(typeof(T), converter == null ? value : converter(value), ignoreCase);
         }
 
 <# foreach (var converter in converters) { #>
-        public static <#= converter #> ParseValueOrDefault(this NameValueCollection source, string key, <#= converter #> defaultValue = default(<#= converter #>), Func<string, string> converter = null)
+        public static <#= converter #> ParseValueOrDefault(this NameValueCollection source, string key, <#= converter #> defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static <#= converter #> ParseValueOrDefault(this NameValueCollection source, string key, <#= converter #> defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 <#= converter #> result;
                 if (value != null && <#= converter #>.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -63,15 +90,39 @@ namespace CodePlex.Web
         }
 
 <# } #>
-        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue = default(T), bool ignoreCase = true)
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, default(T), null, false);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, defaultValue, null, false);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, Func<string, string> converter)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, defaultValue, converter, false);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, bool ignoreCase)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, defaultValue, null, ignoreCase);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, Func<string, string> converter, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 T result;
-                if (value != null && Enum.TryParse(value, ignoreCase, out result))
+                if (value != null && TryParsePrivate(converter == null ? value : converter(value), ignoreCase, out result))
                 {
                     return result;
                 }
@@ -87,6 +138,21 @@ namespace CodePlex.Web
         public static bool ContainsKey(this NameValueCollection source, string key)
         {
             return source.GetValues(key) != null;
+        }
+
+        // for .NET 3.5 compatibility
+        static bool TryParsePrivate<T>(string value, bool ignoreCase, out T result)
+        {
+            try
+            {
+                result = (T)Enum.Parse(typeof(T), value, ignoreCase);
+                return true;
+            }
+            catch
+            {
+                result = default(T);
+                return false;
+            }
         }
     }
 

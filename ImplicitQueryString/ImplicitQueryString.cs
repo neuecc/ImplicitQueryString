@@ -1,37 +1,72 @@
-﻿using System;
+﻿/*--------------------------------------------------------------------------
+ * ImpilicitQueryString
+ * ver 1.0.0.0 (Feb. 18th, 2012)
+ *
+ * created and maintained by neuecc <ils@neue.cc - @neuecc on Twitter>
+ * licensed under Microsoft Public License(Ms-PL)
+ * http://implicitquerystring.codeplex.com/
+ *--------------------------------------------------------------------------*/
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 
 namespace CodePlex.Web
 {
     public static class NameValueCollectionExtensions
     {
-        public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter = null)
+        public static ConvertableString ParseValue(this NameValueCollection source, string key)
+        {
+            return ParseValue(source, key, null);
+        }
+
+        public static ConvertableString ParseValue(this NameValueCollection source, string key, Func<string, string> converter)
         {
             var values = source.GetValues(key);
             if (values == null) throw new KeyNotFoundException();
 
-            var value = values.First();
+            var value = values[0];
             return new ConvertableString(converter == null ? value : converter(value));
         }
 
-        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter = null, bool ignoreCase = true)
+        public static T ParseEnum<T>(this NameValueCollection source, string key)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnum<T>(source, key, null, true);
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnum<T>(source, key, converter, true);
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, bool ignoreCase)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnum<T>(source, key, null, ignoreCase);
+        }
+
+        public static T ParseEnum<T>(this NameValueCollection source, string key, Func<string, string> converter, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             var values = source.GetValues(key);
             if (values == null) throw new KeyNotFoundException();
 
-            var value = values.First();
+            var value = values[0];
             return (T)Enum.Parse(typeof(T), converter == null ? value : converter(value), ignoreCase);
         }
 
-        public static Boolean ParseValueOrDefault(this NameValueCollection source, string key, Boolean defaultValue = default(Boolean), Func<string, string> converter = null)
+        public static Boolean ParseValueOrDefault(this NameValueCollection source, string key, Boolean defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Boolean ParseValueOrDefault(this NameValueCollection source, string key, Boolean defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Boolean result;
                 if (value != null && Boolean.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -46,12 +81,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Char ParseValueOrDefault(this NameValueCollection source, string key, Char defaultValue = default(Char), Func<string, string> converter = null)
+        public static Char ParseValueOrDefault(this NameValueCollection source, string key, Char defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Char ParseValueOrDefault(this NameValueCollection source, string key, Char defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Char result;
                 if (value != null && Char.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -66,12 +106,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static SByte ParseValueOrDefault(this NameValueCollection source, string key, SByte defaultValue = default(SByte), Func<string, string> converter = null)
+        public static SByte ParseValueOrDefault(this NameValueCollection source, string key, SByte defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static SByte ParseValueOrDefault(this NameValueCollection source, string key, SByte defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 SByte result;
                 if (value != null && SByte.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -86,12 +131,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Byte ParseValueOrDefault(this NameValueCollection source, string key, Byte defaultValue = default(Byte), Func<string, string> converter = null)
+        public static Byte ParseValueOrDefault(this NameValueCollection source, string key, Byte defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Byte ParseValueOrDefault(this NameValueCollection source, string key, Byte defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Byte result;
                 if (value != null && Byte.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -106,12 +156,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Int16 ParseValueOrDefault(this NameValueCollection source, string key, Int16 defaultValue = default(Int16), Func<string, string> converter = null)
+        public static Int16 ParseValueOrDefault(this NameValueCollection source, string key, Int16 defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Int16 ParseValueOrDefault(this NameValueCollection source, string key, Int16 defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Int16 result;
                 if (value != null && Int16.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -126,12 +181,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static UInt16 ParseValueOrDefault(this NameValueCollection source, string key, UInt16 defaultValue = default(UInt16), Func<string, string> converter = null)
+        public static UInt16 ParseValueOrDefault(this NameValueCollection source, string key, UInt16 defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static UInt16 ParseValueOrDefault(this NameValueCollection source, string key, UInt16 defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 UInt16 result;
                 if (value != null && UInt16.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -146,12 +206,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Int32 ParseValueOrDefault(this NameValueCollection source, string key, Int32 defaultValue = default(Int32), Func<string, string> converter = null)
+        public static Int32 ParseValueOrDefault(this NameValueCollection source, string key, Int32 defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Int32 ParseValueOrDefault(this NameValueCollection source, string key, Int32 defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Int32 result;
                 if (value != null && Int32.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -166,12 +231,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static UInt32 ParseValueOrDefault(this NameValueCollection source, string key, UInt32 defaultValue = default(UInt32), Func<string, string> converter = null)
+        public static UInt32 ParseValueOrDefault(this NameValueCollection source, string key, UInt32 defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static UInt32 ParseValueOrDefault(this NameValueCollection source, string key, UInt32 defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 UInt32 result;
                 if (value != null && UInt32.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -186,12 +256,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Int64 ParseValueOrDefault(this NameValueCollection source, string key, Int64 defaultValue = default(Int64), Func<string, string> converter = null)
+        public static Int64 ParseValueOrDefault(this NameValueCollection source, string key, Int64 defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Int64 ParseValueOrDefault(this NameValueCollection source, string key, Int64 defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Int64 result;
                 if (value != null && Int64.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -206,12 +281,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static UInt64 ParseValueOrDefault(this NameValueCollection source, string key, UInt64 defaultValue = default(UInt64), Func<string, string> converter = null)
+        public static UInt64 ParseValueOrDefault(this NameValueCollection source, string key, UInt64 defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static UInt64 ParseValueOrDefault(this NameValueCollection source, string key, UInt64 defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 UInt64 result;
                 if (value != null && UInt64.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -226,12 +306,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Single ParseValueOrDefault(this NameValueCollection source, string key, Single defaultValue = default(Single), Func<string, string> converter = null)
+        public static Single ParseValueOrDefault(this NameValueCollection source, string key, Single defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Single ParseValueOrDefault(this NameValueCollection source, string key, Single defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Single result;
                 if (value != null && Single.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -246,12 +331,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Double ParseValueOrDefault(this NameValueCollection source, string key, Double defaultValue = default(Double), Func<string, string> converter = null)
+        public static Double ParseValueOrDefault(this NameValueCollection source, string key, Double defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Double ParseValueOrDefault(this NameValueCollection source, string key, Double defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Double result;
                 if (value != null && Double.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -266,12 +356,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static Decimal ParseValueOrDefault(this NameValueCollection source, string key, Decimal defaultValue = default(Decimal), Func<string, string> converter = null)
+        public static Decimal ParseValueOrDefault(this NameValueCollection source, string key, Decimal defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static Decimal ParseValueOrDefault(this NameValueCollection source, string key, Decimal defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 Decimal result;
                 if (value != null && Decimal.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -286,12 +381,17 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static DateTime ParseValueOrDefault(this NameValueCollection source, string key, DateTime defaultValue = default(DateTime), Func<string, string> converter = null)
+        public static DateTime ParseValueOrDefault(this NameValueCollection source, string key, DateTime defaultValue)
+        {
+            return ParseValueOrDefault(source, key, defaultValue, null);
+        }
+
+        public static DateTime ParseValueOrDefault(this NameValueCollection source, string key, DateTime defaultValue, Func<string, string> converter)
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 DateTime result;
                 if (value != null && DateTime.TryParse(converter == null ? value : converter(value), out result))
                 {
@@ -306,15 +406,39 @@ namespace CodePlex.Web
             return defaultValue;
         }
 
-        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue = default(T), bool ignoreCase = true)
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, default(T), null, false);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, defaultValue, null, false);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, Func<string, string> converter)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, defaultValue, converter, false);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, bool ignoreCase)
+            where T : struct, IComparable, IFormattable, IConvertible
+        {
+            return ParseEnumOrDefault(source, key, defaultValue, null, ignoreCase);
+        }
+
+        public static T ParseEnumOrDefault<T>(this NameValueCollection source, string key, T defaultValue, Func<string, string> converter, bool ignoreCase)
             where T : struct, IComparable, IFormattable, IConvertible
         {
             var values = source.GetValues(key) ?? new string[0];
-            if (values.Any())
+            if (values.Length != 0)
             {
-                var value = values.First();
+                var value = values[0];
                 T result;
-                if (value != null && Enum.TryParse(value, ignoreCase, out result))
+                if (value != null && TryParsePrivate(converter == null ? value : converter(value), ignoreCase, out result))
                 {
                     return result;
                 }
@@ -330,6 +454,21 @@ namespace CodePlex.Web
         public static bool ContainsKey(this NameValueCollection source, string key)
         {
             return source.GetValues(key) != null;
+        }
+
+        // for .NET 3.5 compatibility
+        static bool TryParsePrivate<T>(string value, bool ignoreCase, out T result)
+        {
+            try
+            {
+                result = (T)Enum.Parse(typeof(T), value, ignoreCase);
+                return true;
+            }
+            catch
+            {
+                result = default(T);
+                return false;
+            }
         }
     }
 
